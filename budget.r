@@ -14,6 +14,8 @@ url <- "https://www.nytimes.com/interactive/2017/03/15/us/politics/trump-budget-
 spending <- htmltab(doc = url,
                     which = "//*[contains(concat( \" \", @class, \" \" ), concat( \" \", \"g-table\", \" \" ))]")
 
+head(spending)
+
 spending.df <- spending
 
 colnames(spending.df) <- c("Agency", "Y2017", "Y2018", "change", "pct")
