@@ -9,12 +9,16 @@ ifelse(!dir.exists(file.path("figures")), dir.create(file.path("figures")), FALS
 
 url <- "https://www.nytimes.com/interactive/2017/03/15/us/politics/trump-budget-proposal.html"
 
-spending <- htmltab(doc = url, which = "//*[contains(concat( \" \", @class, \" \" ), concat( \" \", \"g-table\", \" \" ))]")
+## Use SelectorGadget to extract the XPath that identifies the table:
+## http://selectorgadget.com
+spending <- htmltab(doc = url,
+                    which = "//*[contains(concat( \" \", @class, \" \" ), concat( \" \", \"g-table\", \" \" ))]")
 
 spending.df <- spending
 
 colnames(spending.df) <- c("Agency", "Y2017", "Y2018", "change", "pct")
 
+## Clean up. Everything is character, and we need numbers.
 spending.df$Y2017 <- gsub("\\$", "", spending.df$Y2017)
 spending.df$Y2018 <- gsub("\\$", "", spending.df$Y2018)
 spending.df$Y2018 <- gsub("\\$", "", spending.df$Y2018)
@@ -26,9 +30,10 @@ spending.df$change <- with(spending.df, Y2018 - Y2017)
 spending.df$pct <- with(spending.df,
                        round((change / Y2017)*100, 0))
 
+## This variable is meaningless, it's just a hack for the legend we'll
+## make below by overriding the fill aesthetic in the guides() call.
 spending.df$dummy <- "Current"
 spending.df$dummy[2] <- "Proposed"
-spending.df$baseline <- 100
 
 cairo_pdf(file="figures/spending-raw.pdf", height = 6, width = 6)
 p <- ggplot(spending.df, aes(y=reorder(Agency, Y2017), x=Y2017, xend=Y2018, fill = dummy))
