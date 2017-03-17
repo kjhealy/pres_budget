@@ -1,7 +1,7 @@
 library(ggalt)
 library(hrbrthemes)
 library(Cairo)
-library(htmltab)
+library(rvest)
 
 ## Make a "figures" subdirectory if one doesn't exist
 ifelse(!dir.exists(file.path("figures")), dir.create(file.path("figures")), FALSE)
@@ -11,12 +11,14 @@ url <- "https://www.nytimes.com/interactive/2017/03/15/us/politics/trump-budget-
 
 ## Use SelectorGadget to extract the XPath that identifies the table:
 ## http://selectorgadget.com
-spending <- htmltab(doc = url,
-                    which = "//*[contains(concat( \" \", @class, \" \" ), concat( \" \", \"g-table\", \" \" ))]")
 
-head(spending)
+spending <- read_html(url)
 
-spending.df <- spending
+spending.df <- spending %>%
+    html_node("table") %>%
+    html_table()
+
+head(spending.df)
 
 colnames(spending.df) <- c("Agency", "Y2017", "Y2018", "change", "pct")
 
